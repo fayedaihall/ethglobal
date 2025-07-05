@@ -3,7 +3,11 @@
 
 import { MiniKit, Permission } from '@worldcoin/minikit-js';
 import { RequestPermissionPayload } from '@worldcoin/minikit-js';
+import { permission } from 'process';
 import { useState, useRef } from 'react';
+import { bool } from 'yup';
+
+
 
 export default function AudioRecorder() {
     const [isRecording, setIsRecording] = useState(false);
@@ -12,6 +16,7 @@ export default function AudioRecorder() {
     const [uploadStatus, setUploadStatus] = useState<string>('');
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
+
 
     // Request microphone permission
     const requestMicrophonePermission = async () => {
@@ -28,11 +33,14 @@ export default function AudioRecorder() {
     };
 
     // Check existing permissions
-    const checkPermissions = async () => {
+    const checkRequestMicrophonePermission = async () => {
         const payload = await MiniKit.commandsAsync.getPermissions();
         if (payload.finalPayload.status === 'success') {
             const hasPermission = payload.finalPayload.permissions.microphone;
             console.log('Microphone permission:', hasPermission ? 'Granted' : 'Not granted');
+            if (!hasPermission) {
+                requestMicrophonePermission();
+            }
         } else {
             console.error('Failed to check permissions:', payload);
         }
@@ -40,8 +48,7 @@ export default function AudioRecorder() {
 
     const startRecording = async () => {
         try {
-            requestMicrophonePermission();
-            checkPermissions();
+            checkRequestMicrophonePermission();
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorderRef.current = new MediaRecorder(stream);
             audioChunksRef.current = [];
