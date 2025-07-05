@@ -12,6 +12,7 @@ const ErudaProvider = dynamic(
 // Define props for ClientProviders
 interface ClientProvidersProps {
   children: ReactNode;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   session: any; // Use the appropriate type for session from next-auth
 }
 

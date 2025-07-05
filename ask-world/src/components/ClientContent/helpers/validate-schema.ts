@@ -1,8 +1,9 @@
 import * as yup from "yup";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const validateSchema = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema: yup.ObjectSchema<any>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any
 ): Promise<string | null> => {
   let errorMessage: string | null = null;

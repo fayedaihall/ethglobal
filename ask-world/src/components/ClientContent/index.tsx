@@ -8,20 +8,10 @@ import {
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useState } from 'react';
-import { CameraComponent } from './Camera';
-import CheckRequests from './CheckRequests';
 import { ExternalLinks } from './ExternalLinks';
-import { GetPermissions } from './GetPermissions';
 import { Nav } from './Nav';
 import { Pay } from './Pay';
-import { RequestPermission } from './RequestPermissions';
 import { SearchParams } from './SearchParams';
-import { SendHapticFeedback } from './SendHaptic';
-import { Share } from './Share';
-import { ShareContacts } from './ShareContacts';
-import { SignMessage } from './SignMessage';
-import { SignTypedData } from './SignTypedMessage';
-import { SendTransaction } from './Transaction';
 import { User } from './User';
 import { VerifyAction } from './VerifyAction';
 import { WalletAuth } from './WalletAuth';
@@ -120,28 +110,8 @@ export const ClientContent = () => {
           <hr />
           <WalletAuth />
           <hr />
-          <SendTransaction />
-          <hr />
-          <SignMessage />
-          <hr />
-          <SignTypedData />
-          <hr />
-          <ShareContacts />
-          <hr />
-          <RequestPermission />
-          <hr />
-          <GetPermissions />
-          <hr />
-          <CheckRequests />
-          <hr />
-          <SendHapticFeedback />
-          <hr />
-          <Share />
-          <hr />
           <input className="text-xs border-black border-2" />
           <ExternalLinks />
-          <hr />
-          <CameraComponent />
           <hr />
         </div>
       </div>

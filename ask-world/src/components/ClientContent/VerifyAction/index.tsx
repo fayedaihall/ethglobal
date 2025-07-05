@@ -42,16 +42,19 @@ export const VerifyAction = () => {
   ] = useState<string | null>(null);
   const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
   const [verifyActionAppPayload, setVerifyActionAppPayload] = useState<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Record<string, any> | undefined
   >();
 
   const [sentVerifyPayload, setSentVerifyPayload] = useState<Record<
     string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     any
   > | null>(null);
 
   const [devPortalVerifyResponse, setDevPortalVerifyResponse] = useState<Record<
     string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     any
   > | null>(null);
 

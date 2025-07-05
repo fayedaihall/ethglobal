@@ -18,7 +18,7 @@ export const Versions = () => {
     }
 
     try {
-      // @ts-ignore
+      // @ts-expect-error need error
       if (MiniKit.commandsValid(window.WorldApp?.supported_commands)) {
         return { isValid: true };
       } else {
@@ -31,7 +31,7 @@ export const Versions = () => {
     } catch (error) {
       return {
         isValid: false,
-        error: 'Something went wrong on version validation',
+        error: 'Something went wrong on version validation: ' + (error as Error).message,
       };
     }
   };

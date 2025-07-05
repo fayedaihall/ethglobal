@@ -35,8 +35,8 @@ export const WalletAuth = () => {
   const [message, setMessage] = useState<WalletAuthPayload | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [nonce, setNonce] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [receivedWalletAuthPayload, setReceivedWalletAuthPayload] =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     useState<Record<string, any> | null>(null);
   const [profile, setProfile] = useState<User | null>(null);
 

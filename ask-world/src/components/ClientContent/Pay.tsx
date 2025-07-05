@@ -51,12 +51,13 @@ export const Pay = () => {
   const [paymentPayloadValidationMessage, setPaymentPayloadValidationMessage] =
     useState<string | null>();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sentPayPayload, setSentPayPayload] = useState<Record<
     string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     any
   > | null>(null);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const validateResponse = async (payload: any) => {
     console.log('MiniAppPayment, SUBSCRIBE PAYLOAD', payload);
 
