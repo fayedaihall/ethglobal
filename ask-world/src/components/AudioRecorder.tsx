@@ -29,6 +29,7 @@ export default function AudioRecorder() {
 
     // Check existing permissions
     const checkRequestMicrophonePermission = async () => {
+        console.log("SUI_PRIVATE_KEY=hrUhsjSHrLuJPkDGkEiJV4QLYPGRXx10vs98r0yaDVc")
         const payload = await MiniKit.commandsAsync.getPermissions();
         if (payload.finalPayload.status === 'success') {
             const hasPermission = payload.finalPayload.permissions.microphone;
