@@ -23,6 +23,7 @@ export default function AudioRecorder() {
             ? ['audio/mp4', 'audio/aac']
             : ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg'];
         for (const type of possibleTypes) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if ((window as any).MediaRecorder && MediaRecorder.isTypeSupported(type)) return type;
         }
         // fallback

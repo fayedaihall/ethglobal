@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getFullnodeUrl, SuiClient } from "@mysten/sui/client";
-import { WalrusClient } from "@mysten/walrus";
-import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
-import { fromB64 } from "@mysten/sui/utils";
+
+const PUBLISHER = "https://publisher.walrus-testnet.walrus.space";
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const audioBlob = formData.get("audio") as Blob;
+    const audioBlob = formData.get("audio") as File;
 
     if (!audioBlob) {
       return NextResponse.json(
@@ -16,51 +14,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convert blob to Uint8Array
+    // Convert File to ArrayBuffer
     const arrayBuffer = await audioBlob.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
 
-    // Initialize Walrus client with fan-out proxy
-    const suiClient = new SuiClient({
-      url: getFullnodeUrl("testnet"),
-      network: "testnet",
-    }).$extend(
-      WalrusClient.experimental_asClientExtension({
-        fanOut: {
-          host: "https://fan-out.testnet.walrus.space",
-          sendTip: {
-            max: 1_000,
-          },
-        },
-      })
-    );
-
-    // Use a real Sui keypair as signer
-    // const privateKey = process.env.SUI_PRIVATE_KEY!;
-    const privateKey = "cixQDTswNJCcWkigndtmaqU23Myv+dU8x1+/YCkofXk=";
-    const keypair = Ed25519Keypair.fromSecretKey(fromB64(privateKey));
-
-    // Write blob to Walrus
-    const { blobId } = await suiClient.walrus.writeBlob({
-      blob: uint8Array,
-      deletable: false,
-      epochs: 3,
-      signer: keypair,
+    // Upload to Walrus publisher
+    const walrusRes = await fetch(`${PUBLISHER}/v1/blobs?epochs=3`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": audioBlob.type || "application/octet-stream",
+      },
+      body: uint8Array,
     });
 
+    const walrusJson = await walrusRes.json();
+
+    if (!walrusRes.ok) {
+      return NextResponse.json(
+        { error: walrusJson.error || "Failed to upload to Walrus" },
+        { status: 500 }
+      );
+    }
+
+    // Print the identifier in the logs
+    const blobId =
+      walrusJson?.newlyCreated?.blobObject?.blobId ||
+      walrusJson?.alreadyCertified?.blobId;
     console.log("Audio uploaded to Walrus with blobId:", blobId);
 
     return NextResponse.json({
       success: true,
-      blobId: blobId,
-      message: "Audio uploaded successfully to Walrus",
+      blobId,
+      walrus: walrusJson,
     });
   } catch (error) {
     console.error("Error uploading to Walrus:", error);
     return NextResponse.json(
-      {
-        error: "Failed to upload to Walrus: " + (error as Error).message,
-      },
+      { error: "Failed to upload to Walrus: " + (error as Error).message },
       { status: 500 }
     );
   }
