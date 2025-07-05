@@ -5,10 +5,13 @@ import { MiniKit, Permission } from '@worldcoin/minikit-js';
 import { RequestPermissionPayload } from '@worldcoin/minikit-js';
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import CONTRACT_ABI from "../../abi/askworld.json";
 
 function isSafari() {
     return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 }
+
+const CONTRACT_ADDRESS = "0xe3Da9ce8C15F3fcEfdc27036e953b08C8B1D39E7"; // TODO: Fill in your contract address
 
 export default function AudioRecorder() {
     const [isRecording, setIsRecording] = useState(false);
@@ -218,6 +221,25 @@ export default function AudioRecorder() {
         }
     };
 
+    const handleAfterUpload = async (walrusId: string) => {
+        try {
+            // TODO: Update functionName and args as needed for your contract
+            const payload = MiniKit.commands.sendTransaction({
+                transaction: [
+                    {
+                        address: CONTRACT_ADDRESS,
+                        abi: CONTRACT_ABI,
+                        functionName: "submitAnswer", // TODO: update if needed
+                        args: [1, walrusId],
+                    },
+                ],
+            });
+            setUploadStatus('Transaction sent to World Chain!');
+        } catch (err) {
+            setUploadStatus('Failed to send transaction: ' + (err as Error).message);
+        }
+    };
+
     const handleUpload = async () => {
         if (!audioBlob) {
             setUploadStatus('No recording to upload.');
@@ -246,6 +268,8 @@ export default function AudioRecorder() {
                 setToastType('success');
                 setShowToast(true);
                 setAudioBlob(null);
+                // Call the transaction function
+                handleAfterUpload(result.blobId);
             } else {
                 setUploadStatus('Upload failed: ' + (result.error || 'Unknown error'));
                 setToastType('error');
