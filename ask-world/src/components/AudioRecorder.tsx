@@ -1,6 +1,8 @@
 // src/components/AudioRecorder.tsx
 'use client';
 
+import { MiniKit, Permission } from '@worldcoin/minikit-js';
+import { RequestPermissionPayload } from '@worldcoin/minikit-js';
 import { useState, useRef } from 'react';
 
 export default function AudioRecorder() {
@@ -10,6 +12,35 @@ export default function AudioRecorder() {
     const [uploadStatus, setUploadStatus] = useState<string>('');
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
+    const [hasMicrophonePermission, setHasMicrophonePermission] = useState<boolean>(false);
+
+    // Request microphone permission
+    const requestMicrophonePermission = async () => {
+        const requestPermissionPayload: RequestPermissionPayload = {
+            permission: Permission.Microphone,
+        };
+
+        const payload = await MiniKit.commandsAsync.requestPermission(requestPermissionPayload);
+        if (payload.finalPayload.status === 'success') {
+            console.log('Microphone permission granted');
+            setHasMicrophonePermission(true);
+        } else {
+            console.error('Failed to request microphone permission:', payload);
+            setHasMicrophonePermission(false);
+        }
+    };
+
+    // Check existing permissions
+    const checkPermissions = async () => {
+        const payload = await MiniKit.commandsAsync.getPermissions();
+        if (payload.finalPayload.status === 'success') {
+            const hasPermission = payload.finalPayload.permissions.microphone;
+            setHasMicrophonePermission(hasPermission);
+            console.log('Microphone permission:', hasPermission ? 'Granted' : 'Not granted');
+        } else {
+            console.error('Failed to check permissions:', payload);
+        }
+    };
 
     const startRecording = async () => {
         try {
