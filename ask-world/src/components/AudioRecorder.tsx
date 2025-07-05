@@ -5,6 +5,10 @@ import { MiniKit, Permission } from '@worldcoin/minikit-js';
 import { RequestPermissionPayload } from '@worldcoin/minikit-js';
 import { useState, useRef } from 'react';
 
+function isSafari() {
+    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+}
+
 export default function AudioRecorder() {
     const [isRecording, setIsRecording] = useState(false);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -12,6 +16,18 @@ export default function AudioRecorder() {
     const [uploadStatus, setUploadStatus] = useState<string>('');
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
+
+    // Detect supported MIME type
+    function getSupportedMimeType() {
+        const possibleTypes = isSafari()
+            ? ['audio/mp4', 'audio/aac']
+            : ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg'];
+        for (const type of possibleTypes) {
+            if ((window as any).MediaRecorder && MediaRecorder.isTypeSupported(type)) return type;
+        }
+        // fallback
+        return '';
+    }
 
     // Request microphone permission
     const requestMicrophonePermission = async () => {
@@ -44,8 +60,9 @@ export default function AudioRecorder() {
     const startRecording = async () => {
         try {
             checkRequestMicrophonePermission();
+            const mimeType = getSupportedMimeType();
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorderRef.current = new MediaRecorder(stream);
+            mediaRecorderRef.current = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
             audioChunksRef.current = [];
 
             mediaRecorderRef.current.ondataavailable = (event) => {
@@ -53,7 +70,7 @@ export default function AudioRecorder() {
             };
 
             mediaRecorderRef.current.onstop = () => {
-                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                const audioBlob = new Blob(audioChunksRef.current, { type: mimeType || 'audio/webm' });
                 setAudioBlob(audioBlob);
                 stream.getTracks().forEach((track) => track.stop());
             };
