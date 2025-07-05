@@ -65,7 +65,7 @@ export default function AudioRecorder() {
                 setUploadStatus('Upload failed. Try again.');
             }
         } catch (error) {
-            setUploadStatus('Error uploading recording.');
+            setUploadStatus('Error uploading recording: ' + (error as Error).message);
         } finally {
             setUploading(false);
         }
