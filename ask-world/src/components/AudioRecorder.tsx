@@ -224,7 +224,7 @@ export default function AudioRecorder() {
     const handleAfterUpload = async (walrusId: string) => {
         try {
             // TODO: Update functionName and args as needed for your contract
-            const payload = MiniKit.commands.sendTransaction({
+            MiniKit.commands.sendTransaction({
                 transaction: [
                     {
                         address: CONTRACT_ADDRESS,
