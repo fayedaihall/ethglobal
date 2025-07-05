@@ -35,6 +35,7 @@ export const RequestPermission = () => {
     setRequestPermissionPayloadValidationMessage,
   ] = useState<string | null>();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sentRequestPermissionPayload, setSentRequestPermissionPayload] =
     useState<Record<string, any> | null>(null);
 

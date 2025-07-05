@@ -39,6 +39,7 @@ export const SignMessage = () => {
     setSignMessagePayloadVerificationMessage,
   ] = useState<string | null>();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sentSignMessagePayload, setSentSignMessagePayload] = useState<Record<
     string,
     any

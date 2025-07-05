@@ -1,8 +1,9 @@
-import * as yup from 'yup';
+import * as yup from "yup";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const validateSchema = async (
   schema: yup.ObjectSchema<any>,
-  payload: any,
+  payload: any
 ): Promise<string | null> => {
   let errorMessage: string | null = null;
 
@@ -10,7 +11,7 @@ export const validateSchema = async (
     await schema.validate(payload);
   } catch (error) {
     if (!(error instanceof yup.ValidationError)) {
-      errorMessage = 'Unknown error';
+      errorMessage = "Unknown error";
       return errorMessage;
     }
 

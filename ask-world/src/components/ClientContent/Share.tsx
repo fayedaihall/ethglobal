@@ -34,6 +34,7 @@ const sendHapticFeedbackErrorPayloadSchema = yup.object({
   version: yup.number().required(),
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const Share = () => {
   const [sentShareFilesPayload, setSentShareFilesPayload] = useState<Record<
     string,

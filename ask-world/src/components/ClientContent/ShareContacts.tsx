@@ -34,6 +34,7 @@ export const ShareContacts = () => {
     setShareContactsPayloadValidationMessage,
   ] = useState<string | null>();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sentShareContactsPayload, setSentShareContactsPayload] =
     useState<Record<string, any> | null>(null);
 

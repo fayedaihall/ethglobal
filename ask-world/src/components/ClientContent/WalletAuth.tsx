@@ -30,10 +30,12 @@ const walletAuthErrorPayloadSchema = yup.object({
 Note: This is not a secure implementation of Wallet Auth.
 It is only for demo purposes.
 */
+
 export const WalletAuth = () => {
   const [message, setMessage] = useState<WalletAuthPayload | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [nonce, setNonce] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [receivedWalletAuthPayload, setReceivedWalletAuthPayload] =
     useState<Record<string, any> | null>(null);
   const [profile, setProfile] = useState<User | null>(null);

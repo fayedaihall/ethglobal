@@ -164,6 +164,7 @@ export const SignTypedData = () => {
     setSignTypedDataPayloadVerificationMessage,
   ] = useState<string | null>();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sentSignTypedDataPayload, setSentSignTypedDataPayload] =
     useState<Record<string, any> | null>(null);
 

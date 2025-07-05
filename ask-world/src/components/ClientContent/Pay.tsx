@@ -10,6 +10,17 @@ import { useCallback, useState } from 'react';
 import * as yup from 'yup';
 import { validateSchema } from './helpers/validate-schema';
 
+// interface PayPayload {
+//   reference?: string; // Transaction reference
+//   amount?: string | number; // Payment amount (string for precision, number for simplicity)
+//   token?: string; // Token type (e.g., "WLD")
+//   receiver?: string; // Recipient address or ID
+//   action?: string; // Action type (e.g., "pay")
+//   status?: string; // Transaction status (e.g., "pending", "completed")
+//   timestamp?: string; // ISO timestamp
+//   [key: string]: unknown; // Allow additional fields for flexibility
+// }
+
 const paymentSuccessPayloadSchema = yup.object({
   status: yup.string<'success'>().oneOf(['success']),
   transaction_status: yup.string<'submitted'>().oneOf(['submitted']),
@@ -28,6 +39,7 @@ const paymentErrorPayloadSchema = yup.object({
   status: yup.string<'error'>().equals(['error']).required(),
 });
 
+
 /* Asynchronous Implementation
 For the purpose of variability some of these commands use async handlers
 and some of the commands user synchronous responses. 
@@ -39,6 +51,7 @@ export const Pay = () => {
   const [paymentPayloadValidationMessage, setPaymentPayloadValidationMessage] =
     useState<string | null>();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sentPayPayload, setSentPayPayload] = useState<Record<
     string,
     any

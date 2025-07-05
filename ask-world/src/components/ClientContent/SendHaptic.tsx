@@ -32,6 +32,7 @@ const allPossibleHaptics: SendHapticFeedbackInput[] = [
   { hapticsType: 'selection-changed' },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const SendHapticFeedback = () => {
   const [sentHapticFeedbackPayload, setSentHapticFeedbackPayload] =
     useState<Record<string, any> | null>(null);
