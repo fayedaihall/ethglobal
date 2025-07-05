@@ -11,7 +11,7 @@ function isSafari() {
     return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 }
 
-const CONTRACT_ADDRESS = "0xe3Da9ce8C15F3fcEfdc27036e953b08C8B1D39E7";
+const CONTRACT_ADDRESS = "0x185591a5DC4B65B8B7AF5befca02C702F23C476C";
 
 export default function AudioRecorder() {
     const [isRecording, setIsRecording] = useState(false);
