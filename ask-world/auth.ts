@@ -1,9 +1,9 @@
 import NextAuth from "next-auth";
-import type { AuthOptions } from "next-auth";
+import type { NextAuthConfig } from "next-auth";
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
-export const authOptions: AuthOptions = {
+export const authOptions: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
@@ -20,7 +20,7 @@ export const authOptions: AuthOptions = {
         process.env.NEXT_PUBLIC_ENVIRONMENT === "staging"
           ? "https://staging.id.worldcoin.org"
           : "https://id.worldcoin.org",
-      checks: ["state", "pkce", "nonce"],
+      checks: ["state", "pkce", "none"],
       profile(profile) {
         return {
           id: profile.sub,
