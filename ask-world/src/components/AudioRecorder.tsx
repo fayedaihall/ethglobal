@@ -36,14 +36,14 @@ export default function AudioRecorder() {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
 
-    // Mock questions data - in a real app, this would come from an API
-    const questions = [
-        "What's your favorite way to spend a weekend?",
-        "If you could have dinner with anyone, who would it be?",
-        "What's the most valuable lesson you've learned?",
-        "What's your biggest dream for the future?",
-        "What makes you feel most alive?"
-    ];
+    // Use state for questions so we can update the list
+    const [questions, setQuestions] = useState([
+        { id: 1, text: "What's your favorite way to spend a weekend?" },
+        { id: 2, text: "If you could have dinner with anyone, who would it be?" },
+        { id: 3, text: "What's the most valuable lesson you've learned?" },
+        { id: 4, text: "What's your biggest dream for the future?" },
+        { id: 5, text: "What makes you feel most alive?" },
+    ]);
 
     // Track recording duration
     useEffect(() => {
@@ -171,9 +171,14 @@ export default function AudioRecorder() {
         setShowToast(false);
 
         try {
-            // For now, we'll just simulate a submission
-            // In the future, this could connect to an API
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Add the new question to the list with a unique id
+            setQuestions(prev => {
+                const maxId = prev.length > 0 ? Math.max(...prev.map(q => q.id)) : 0;
+                return [...prev, { id: maxId + 1, text: question.trim() }];
+            });
 
             setQuestionStatus('Question submitted successfully!');
             setToastType('success');
@@ -242,13 +247,14 @@ export default function AudioRecorder() {
 
     const handleAfterUpload = async (walrusId: string) => {
         try {
+            const questionId = questions[currentCardIndex].id;
             MiniKit.commands.sendTransaction({
                 transaction: [
                     {
                         address: CONTRACT_ADDRESS,
                         abi: CONTRACT_ABI,
                         functionName: "submitAnswer",
-                        args: [1, walrusId],
+                        args: [questionId, walrusId],
                     },
                 ],
             });
@@ -400,7 +406,7 @@ export default function AudioRecorder() {
                 {/* Question display */}
                 <div className="flex flex-col items-center mb-6 w-full">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center leading-tight">
-                        {questions[currentCardIndex]}
+                        {questions[currentCardIndex].text}
                     </h2>
                     <div className="flex items-center gap-2 mb-4">
                         <span className="text-sm text-gray-500">
