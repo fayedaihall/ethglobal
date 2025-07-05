@@ -228,7 +228,7 @@ export default function AudioRecorder() {
                     {
                         address: CONTRACT_ADDRESS,
                         abi: CONTRACT_ABI,
-                        functionName: "submitFeedback",
+                        functionName: "submitAnswer",
                         args: [1, walrusId],
                     },
                 ],
