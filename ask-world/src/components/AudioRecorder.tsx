@@ -223,17 +223,28 @@ export default function AudioRecorder() {
 
     const handleAfterUpload = async (walrusId: string) => {
         try {
-            // TODO: Update functionName and args as needed for your contract
-            MiniKit.commands.sendTransaction({
+            const payload = await MiniKit.commands.sendTransaction({
                 transaction: [
                     {
                         address: CONTRACT_ADDRESS,
                         abi: CONTRACT_ABI,
-                        functionName: "submitAnswer", // TODO: update if needed
+                        functionName: "submitFeedback",
                         args: [1, walrusId],
                     },
                 ],
             });
+            // Log both possible transaction id keys
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const transactionId = (payload as any).transactionId;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const transaction_id = (payload as any).transaction_id;
+            console.log('MiniKit transaction payload:', payload);
+            if (transactionId) {
+                console.log('transactionId:', transactionId);
+            }
+            if (transaction_id) {
+                console.log('transaction_id:', transaction_id);
+            }
             setUploadStatus('Transaction sent to World Chain!');
         } catch (err) {
             setUploadStatus('Failed to send transaction: ' + (err as Error).message);
