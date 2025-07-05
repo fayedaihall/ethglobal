@@ -279,7 +279,7 @@ export default function AudioRecorder() {
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-500 py-8 px-2">
                 <div className="w-full max-w-md bg-white/90 rounded-3xl shadow-2xl p-8 flex flex-col items-center animate-fade-in">
                     <div className="flex flex-col items-center mb-6">
-                        <Image src="/globe.svg" alt="Mini World" width={64} height={64} className="mb-2 animate-pop" />
+                        <Image src="/askworld-logo.png" alt="Ask World Logo" width={120} height={120} className="mb-2 animate-pop" />
                         <h1 className="text-3xl font-extrabold text-gray-900 mb-1 tracking-tight">Mini World</h1>
                         <p className="text-sm text-gray-500 mb-2">Ask a question to the community</p>
                     </div>
@@ -326,8 +326,7 @@ export default function AudioRecorder() {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-500 py-8 px-2">
                 <div className="w-full max-w-md bg-white/90 rounded-3xl shadow-2xl p-8 flex flex-col items-center animate-fade-in">
-                    <Image src="/globe.svg" alt="Mini World" width={64} height={64} className="mb-6 animate-pop" />
-                    <h1 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">Mini World</h1>
+                    <Image src="/askworld-logo.png" alt="Ask World Logo" width={120} height={120} className="mb-6 animate-pop" />
                     <div className="flex gap-8 w-full justify-center">
                         <button
                             className="transition-all flex items-center gap-2 px-12 py-4 rounded-full font-bold shadow-lg bg-gradient-to-r from-green-400 to-blue-500 text-white hover:from-green-500 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-green-400 text-xl transform hover:scale-105 active:scale-95"
