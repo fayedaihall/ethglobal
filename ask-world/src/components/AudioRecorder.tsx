@@ -3,10 +3,7 @@
 
 import { MiniKit, Permission } from '@worldcoin/minikit-js';
 import { RequestPermissionPayload } from '@worldcoin/minikit-js';
-import { permission } from 'process';
 import { useState, useRef } from 'react';
-import { bool } from 'yup';
-
 
 
 export default function AudioRecorder() {
