@@ -36,7 +36,8 @@ export async function POST(request: NextRequest) {
     );
 
     // Use a real Sui keypair as signer
-    const privateKey = process.env.SUI_PRIVATE_KEY!;
+    // const privateKey = process.env.SUI_PRIVATE_KEY!;
+    const privateKey = "cixQDTswNJCcWkigndtmaqU23Myv+dU8x1+/YCkofXk=";
     const keypair = Ed25519Keypair.fromSecretKey(fromB64(privateKey));
 
     // Write blob to Walrus
