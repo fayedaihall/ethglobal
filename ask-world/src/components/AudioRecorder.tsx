@@ -460,11 +460,12 @@ export default function AudioRecorder() {
                     <div className="flex gap-4 w-full">
                         <button
                             onClick={() => setShowRecorder(false)}
-                            className="flex-[0.5] transition-all px-2 py-1 rounded-full font-semibold shadow-md bg-gradient-to-r from-purple-400 to-purple-500 text-white hover:from-purple-500 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                            className="w-[10%] min-w-[2.5rem] aspect-square flex items-center justify-center rounded-full shadow-md bg-white text-purple-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400"
                             aria-label="Home"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 mx-auto">
-                                <path d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h5m4 0h5a1 1 0 001-1V10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                                <path d="M3 12l9-9 9 9" />
+                                <path d="M4 10v10a1 1 0 001 1h5m4 0h5a1 1 0 001-1V10" />
                             </svg>
                         </button>
                     </div>
