@@ -1,7 +1,7 @@
 // src/components/AudioRecorder.tsx
 'use client';
 
-import { MiniKit, Permission } from '@worldcoin/minikit-js';
+import { MiniKit, Permission, ResponseEvent } from '@worldcoin/minikit-js';
 import { RequestPermissionPayload } from '@worldcoin/minikit-js';
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
@@ -32,6 +32,7 @@ export default function AudioRecorder() {
     const [isDragging, setIsDragging] = useState(false);
     const [recordingDuration, setRecordingDuration] = useState(0);
     const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null);
+    const [transactionId, setTransactionId] = useState<string | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
 
@@ -63,6 +64,24 @@ export default function AudioRecorder() {
             }
         };
     }, [isRecording, recordingStartTime]);
+
+    useEffect(() => {
+        if (!MiniKit.isInstalled()) return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const handler = (payload: any) => {
+            if (payload.status === "error") {
+                console.error("Error sending transaction", payload);
+            } else {
+                setTransactionId(payload.transaction_id);
+                console.log("transaction_id:", payload.transaction_id);
+                console.log("transaction id:", transactionId);
+            }
+        };
+        MiniKit.subscribe(ResponseEvent.MiniAppSendTransaction, handler);
+        return () => {
+            MiniKit.unsubscribe(ResponseEvent.MiniAppSendTransaction);
+        };
+    }, []);
 
     // Detect supported MIME type
     function getSupportedMimeType() {
@@ -223,7 +242,7 @@ export default function AudioRecorder() {
 
     const handleAfterUpload = async (walrusId: string) => {
         try {
-            const payload = await MiniKit.commands.sendTransaction({
+            MiniKit.commands.sendTransaction({
                 transaction: [
                     {
                         address: CONTRACT_ADDRESS,
@@ -233,18 +252,6 @@ export default function AudioRecorder() {
                     },
                 ],
             });
-            // Log both possible transaction id keys
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const transactionId = (payload as any).transactionId;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const transaction_id = (payload as any).transaction_id;
-            console.log('MiniKit transaction payload:', payload);
-            if (transactionId) {
-                console.log('transactionId:', transactionId);
-            }
-            if (transaction_id) {
-                console.log('transaction_id:', transaction_id);
-            }
             setUploadStatus('Transaction sent to World Chain!');
         } catch (err) {
             setUploadStatus('Failed to send transaction: ' + (err as Error).message);
