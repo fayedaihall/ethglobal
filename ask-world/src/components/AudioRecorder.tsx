@@ -5,7 +5,6 @@ import { MiniKit, Permission } from '@worldcoin/minikit-js';
 import { RequestPermissionPayload } from '@worldcoin/minikit-js';
 import { useState, useRef } from 'react';
 
-
 export default function AudioRecorder() {
     const [isRecording, setIsRecording] = useState(false);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -13,7 +12,6 @@ export default function AudioRecorder() {
     const [uploadStatus, setUploadStatus] = useState<string>('');
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
-
 
     // Request microphone permission
     const requestMicrophonePermission = async () => {
@@ -82,23 +80,29 @@ export default function AudioRecorder() {
         }
 
         setUploading(true);
-        const formData = new FormData();
-        formData.append('audio', audioBlob, `recording-${Date.now()}.webm`);
+        setUploadStatus('Uploading to Walrus...');
 
         try {
-            const response = await fetch('/api/upload', {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, `recording-${Date.now()}.webm`);
+
+            const response = await fetch('/api/upload-walrus', {
                 method: 'POST',
                 body: formData,
             });
 
-            if (response.ok) {
-                setUploadStatus('Upload successful!');
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                console.log('Audio uploaded to Walrus with blobId:', result.blobId);
+                setUploadStatus(`Upload successful! Blob ID: ${result.blobId}`);
                 setAudioBlob(null);
             } else {
-                setUploadStatus('Upload failed. Try again.');
+                setUploadStatus('Upload failed: ' + (result.error || 'Unknown error'));
             }
         } catch (error) {
-            setUploadStatus('Error uploading recording: ' + (error as Error).message);
+            console.error('Error uploading to Walrus:', error);
+            setUploadStatus('Error uploading to Walrus: ' + (error as Error).message);
         } finally {
             setUploading(false);
         }
@@ -134,7 +138,7 @@ export default function AudioRecorder() {
                 disabled={!audioBlob || uploading}
                 className="bg-green-500 text-white px-4 py-2 rounded disabled:bg-gray-400"
             >
-                {uploading ? 'Uploading...' : 'Upload Recording'}
+                {uploading ? 'Uploading to Walrus...' : 'Upload to Walrus'}
             </button>
         </div>
     );

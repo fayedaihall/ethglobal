@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb", // Adjust based on expected audio file size
     },
   },
+  serverExternalPackages: ["@mysten/walrus", "@mysten/walrus-wasm"],
 };
 
 export default nextConfig;

@@ -9,12 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mysten/bcs": "^1.6.3",
+    "@mysten/sui": "^1.35.0",
+    "@mysten/walrus": "^0.2.1",
     "@safe-global/protocol-kit": "^6.1.0",
     "@wagmi/core": "^2.17.3",
     "@worldcoin/minikit-js": "^1.9.6",
     "@worldcoin/minikit-react": "^1.9.7",
     "clsx": "^2.1.1",
     "eruda": "^3.4.3",
+    "keypairs": "link:@mysten/sui/keypairs",
     "next": "15.3.5",
     "next-auth": "5.0.0-beta.29",
     "react": "^19.0.0",
