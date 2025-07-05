@@ -203,7 +203,9 @@ export default function AudioRecorder() {
 
     // Swipe functionality
     const handleTouchStart = (e: React.TouchEvent) => {
+        e.preventDefault();
         setStartX(e.touches[0].clientX);
+        setCurrentX(e.touches[0].clientX);
         setIsDragging(true);
     };
 
@@ -217,19 +219,16 @@ export default function AudioRecorder() {
         if (isDragging) {
             const diff = startX - currentX;
             const threshold = 50;
-
+            console.log('TouchEnd diff:', diff, 'startX:', startX, 'currentX:', currentX);
             if (Math.abs(diff) > threshold) {
                 if (diff > 0 && currentCardIndex < questions.length - 1) {
-                    // Swipe left - next card
                     setCurrentCardIndex(currentCardIndex + 1);
                 } else if (diff < 0 && currentCardIndex > 0) {
-                    // Swipe right - previous card
                     setCurrentCardIndex(currentCardIndex - 1);
                 }
             }
-
             setIsDragging(false);
-            setCurrentX(0);
+            setCurrentX(startX);
         }
     };
 
