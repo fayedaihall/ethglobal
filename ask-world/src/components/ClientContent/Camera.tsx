@@ -6,7 +6,7 @@ export const CameraComponent = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const handleChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>, source: string) => {
+    (event: ChangeEvent<HTMLInputElement>, _: string) => {
       const files = event.target.files;
       if (!files) {
         return;

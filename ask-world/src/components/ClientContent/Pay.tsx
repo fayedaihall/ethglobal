@@ -44,7 +44,7 @@ export const Pay = () => {
     any
   > | null>(null);
 
-  const validateResponse = async (payload) => {
+  const validateResponse = async (payload: any) => {
     console.log('MiniAppPayment, SUBSCRIBE PAYLOAD', payload);
 
     if (payload.status === 'error') {
@@ -94,14 +94,14 @@ export const Pay = () => {
         to: address,
         tokens: token
           ? [
-              {
-                symbol: token,
-                token_amount:
-                  token === Tokens.WLD
-                    ? wldAmount.toString()
-                    : usdcAmount.toString(),
-              },
-            ]
+            {
+              symbol: token,
+              token_amount:
+                token === Tokens.WLD
+                  ? wldAmount.toString()
+                  : usdcAmount.toString(),
+            },
+          ]
           : tokenPayload,
         description: 'Test example payment for minikit on Worldchain',
         reference: new Date().toISOString(),

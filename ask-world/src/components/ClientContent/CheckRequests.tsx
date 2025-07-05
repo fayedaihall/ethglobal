@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 export default function CheckRequests() {
-  const [nonce, setNonce] = useState<string | null>(null);
+  const [_, setNonce] = useState<string | null>(null);
   const [localNonce, setLocalNonce] = useState<string | null>(null);
   const [response, setResponse] = useState<string | null>(null);
   const handleClick = async () => {

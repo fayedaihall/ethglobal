@@ -6,7 +6,7 @@ import {
   MiniKitInstallErrorMessage,
 } from '@worldcoin/minikit-js';
 
-const appId = 'your-app-id';
+const appId = 'app_5dcb83ccd3621bcfacc75f57a14046e3';
 
 export const Versions = () => {
   const isValid = () => {

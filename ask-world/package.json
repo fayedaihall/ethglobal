@@ -9,12 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@safe-global/protocol-kit": "^6.1.0",
     "@worldcoin/minikit-js": "^1.9.6",
+    "@worldcoin/minikit-react": "^1.9.7",
     "eruda": "^3.4.3",
     "next": "15.3.5",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
