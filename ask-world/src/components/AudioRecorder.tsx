@@ -3,7 +3,7 @@
 
 import { MiniKit, Permission } from '@worldcoin/minikit-js';
 import { RequestPermissionPayload } from '@worldcoin/minikit-js';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 
 function isSafari() {
@@ -18,8 +18,48 @@ export default function AudioRecorder() {
     const [showToast, setShowToast] = useState(false);
     const [toastType, setToastType] = useState<'success' | 'error'>('success');
     const [blobId, setBlobId] = useState<string | null>(null);
+    const [showRecorder, setShowRecorder] = useState(false);
+    const [showAskPage, setShowAskPage] = useState(false);
+    const [question, setQuestion] = useState('');
+    const [submittingQuestion, setSubmittingQuestion] = useState(false);
+    const [questionStatus, setQuestionStatus] = useState<string>('');
+    const [currentCardIndex, setCurrentCardIndex] = useState(0);
+    const [startX, setStartX] = useState(0);
+    const [currentX, setCurrentX] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+    const [recordingDuration, setRecordingDuration] = useState(0);
+    const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
+
+    // Mock questions data - in a real app, this would come from an API
+    const questions = [
+        "What's your favorite way to spend a weekend?",
+        "If you could have dinner with anyone, who would it be?",
+        "What's the most valuable lesson you've learned?",
+        "What's your biggest dream for the future?",
+        "What makes you feel most alive?"
+    ];
+
+    // Track recording duration
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+
+        if (isRecording && recordingStartTime) {
+            interval = setInterval(() => {
+                const duration = Math.floor((Date.now() - recordingStartTime) / 1000);
+                setRecordingDuration(duration);
+            }, 100);
+        } else {
+            setRecordingDuration(0);
+        }
+
+        return () => {
+            if (interval) {
+                clearInterval(interval);
+            }
+        };
+    }, [isRecording, recordingStartTime]);
 
     // Detect supported MIME type
     function getSupportedMimeType() {
@@ -83,6 +123,7 @@ export default function AudioRecorder() {
             mediaRecorderRef.current.start();
             setIsRecording(true);
             setUploadStatus('');
+            setRecordingStartTime(Date.now());
         } catch (error) {
             setUploadStatus('Failed to access microphone: ' + (error as Error).message);
         }
@@ -92,6 +133,88 @@ export default function AudioRecorder() {
         if (mediaRecorderRef.current) {
             mediaRecorderRef.current.stop();
             setIsRecording(false);
+            setRecordingStartTime(null);
+            setRecordingDuration(0);
+        }
+    };
+
+    const handleQuestionSubmit = async () => {
+        if (!question.trim()) {
+            setQuestionStatus('Please enter a question.');
+            return;
+        }
+
+        setSubmittingQuestion(true);
+        setQuestionStatus('Submitting question...');
+        setShowToast(false);
+
+        try {
+            // For now, we'll just simulate a submission
+            // In the future, this could connect to an API
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+
+            setQuestionStatus('Question submitted successfully!');
+            setToastType('success');
+            setShowToast(true);
+            setQuestion('');
+
+            // Return to main page after a delay
+            setTimeout(() => {
+                setShowAskPage(false);
+                setQuestionStatus('');
+            }, 2000);
+
+        } catch (error) {
+            console.error('Error submitting question:', error);
+            setQuestionStatus('Error submitting question: ' + (error as Error).message);
+            setToastType('error');
+            setShowToast(true);
+        } finally {
+            setSubmittingQuestion(false);
+        }
+    };
+
+    // Swipe functionality
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setStartX(e.touches[0].clientX);
+        setIsDragging(true);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (isDragging) {
+            setCurrentX(e.touches[0].clientX);
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (isDragging) {
+            const diff = startX - currentX;
+            const threshold = 50;
+
+            if (Math.abs(diff) > threshold) {
+                if (diff > 0 && currentCardIndex < questions.length - 1) {
+                    // Swipe left - next card
+                    setCurrentCardIndex(currentCardIndex + 1);
+                } else if (diff < 0 && currentCardIndex > 0) {
+                    // Swipe right - previous card
+                    setCurrentCardIndex(currentCardIndex - 1);
+                }
+            }
+
+            setIsDragging(false);
+            setCurrentX(0);
+        }
+    };
+
+    const goToNextCard = () => {
+        if (currentCardIndex < questions.length - 1) {
+            setCurrentCardIndex(currentCardIndex + 1);
+        }
+    };
+
+    const goToPreviousCard = () => {
+        if (currentCardIndex > 0) {
+            setCurrentCardIndex(currentCardIndex - 1);
         }
     };
 
@@ -150,54 +273,186 @@ export default function AudioRecorder() {
         }
     };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-500 py-8 px-2">
-            <div className="w-full max-w-md bg-white/90 rounded-3xl shadow-2xl p-8 flex flex-col items-center animate-fade-in">
-                <div className="flex flex-col items-center mb-6">
-                    <Image src="/globe.svg" alt="Mini World" width={64} height={64} className="mb-2 animate-pop" />
-                    <h1 className="text-3xl font-extrabold text-gray-900 mb-1 tracking-tight">Mini World</h1>
-                    <p className="text-sm text-gray-500 mb-2">Record your voice and store it on Walrus</p>
-                </div>
-                <div className="flex space-x-4 mb-6">
-                    <button
-                        onClick={startRecording}
-                        disabled={isRecording || uploading}
-                        className={`transition-all flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold shadow-md bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 ${isRecording ? 'animate-pulse' : ''}`}
-                    >
-                        <span role="img" aria-label="record">🎤</span>
-                        {isRecording ? 'Recording...' : 'Start Recording'}
-                    </button>
-                    <button
-                        onClick={stopRecording}
-                        disabled={!isRecording || uploading}
-                        className="transition-all flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold shadow-md bg-gradient-to-r from-indigo-500 to-blue-500 text-white hover:from-indigo-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50"
-                    >
-                        <span role="img" aria-label="stop">⏹️</span>
-                        Stop
-                    </button>
-                </div>
-                {isRecording && (
-                    <div className="w-full flex items-center justify-center mb-4">
-                        <div className="w-2 h-2 bg-red-500 rounded-full animate-ping mr-2"></div>
-                        <span className="text-red-500 font-medium">Recording in progress...</span>
+    // Ask page
+    if (showAskPage) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-500 py-8 px-2">
+                <div className="w-full max-w-md bg-white/90 rounded-3xl shadow-2xl p-8 flex flex-col items-center animate-fade-in">
+                    <div className="flex flex-col items-center mb-6">
+                        <Image src="/globe.svg" alt="Mini World" width={64} height={64} className="mb-2 animate-pop" />
+                        <h1 className="text-3xl font-extrabold text-gray-900 mb-1 tracking-tight">Mini World</h1>
+                        <p className="text-sm text-gray-500 mb-2">Ask a question to the community</p>
                     </div>
-                )}
-                {audioBlob && (
+
+                    <div className="w-full mb-6">
+                        <textarea
+                            value={question}
+                            onChange={(e) => setQuestion(e.target.value)}
+                            placeholder="Type your question here..."
+                            className="w-full h-32 p-4 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-400"
+                            disabled={submittingQuestion}
+                        />
+                    </div>
+
+                    {questionStatus && (
+                        <p className={`mb-4 text-center text-base font-medium ${questionStatus.startsWith('Question submitted successfully') ? 'text-green-600' : 'text-red-600'}`}>
+                            {questionStatus}
+                        </p>
+                    )}
+
+                    <div className="flex gap-4 w-full">
+                        <button
+                            onClick={() => setShowAskPage(false)}
+                            disabled={submittingQuestion}
+                            className="flex-1 transition-all px-6 py-3 rounded-full font-semibold shadow-md bg-gradient-to-r from-gray-400 to-gray-500 text-white hover:from-gray-500 hover:to-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50"
+                        >
+                            Back
+                        </button>
+                        <button
+                            onClick={handleQuestionSubmit}
+                            disabled={!question.trim() || submittingQuestion}
+                            className="flex-1 transition-all px-6 py-3 rounded-full font-semibold shadow-md bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-green-400 disabled:opacity-50"
+                        >
+                            {submittingQuestion ? 'Submitting...' : 'Submit Question'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Top-level: Ask/Answer buttons
+    if (!showRecorder) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-500 py-8 px-2">
+                <div className="w-full max-w-md bg-white/90 rounded-3xl shadow-2xl p-8 flex flex-col items-center animate-fade-in">
+                    <Image src="/globe.svg" alt="Mini World" width={64} height={64} className="mb-6 animate-pop" />
+                    <h1 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">Mini World</h1>
+                    <div className="flex gap-8 w-full justify-center">
+                        <button
+                            className="transition-all flex items-center gap-2 px-12 py-4 rounded-full font-bold shadow-lg bg-gradient-to-r from-green-400 to-blue-500 text-white hover:from-green-500 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-green-400 text-xl transform hover:scale-105 active:scale-95"
+                            onClick={() => setShowAskPage(true)}
+                        >
+                            Ask
+                        </button>
+                        <button
+                            className="transition-all flex items-center gap-2 px-12 py-4 rounded-full font-bold shadow-lg bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xl transform hover:scale-105 active:scale-95"
+                            onClick={() => setShowRecorder(true)}
+                        >
+                            Answer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Swipable cards UI
+    return (
+        <div
+            className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-500 py-8 px-2"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
+            <div className="w-full max-w-md bg-white/90 rounded-3xl shadow-2xl p-8 flex flex-col items-center animate-fade-in">
+                {/* Question display */}
+                <div className="flex flex-col items-center mb-6 w-full">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center leading-tight">
+                        {questions[currentCardIndex]}
+                    </h2>
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className="text-sm text-gray-500">
+                            {currentCardIndex + 1} of {questions.length}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Big round Start Recording button or Stop button */}
+                <div className="flex flex-col items-center w-full mb-6">
+                    {!isRecording ? (
+                        <button
+                            onClick={startRecording}
+                            disabled={uploading}
+                            className="start-recording-btn mb-2 animate-pop"
+                        >
+                        </button>
+                    ) : (
+                        <>
+                            <div className="flex flex-col items-center mb-4">
+                                <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                    <div
+                                        className="bg-red-500 h-2 rounded-full transition-all duration-100"
+                                        style={{ width: `${Math.min((recordingDuration / 60) * 100, 100)}%` }}
+                                    ></div>
+                                </div>
+                                <span className="text-red-500 font-medium text-sm">
+                                    Recording: {Math.floor(recordingDuration / 60)}:{(recordingDuration % 60).toString().padStart(2, '0')}
+                                </span>
+                            </div>
+                            <button
+                                onClick={stopRecording}
+                                disabled={uploading}
+                                className="stop-recording-btn mb-2 animate-pop"
+                            >
+                            </button>
+                        </>
+                    )}
+                </div>
+
+                {audioBlob && !isRecording && (
                     <div className="mb-6 w-full">
                         <audio controls src={URL.createObjectURL(audioBlob)} className="w-full rounded-lg border border-gray-200 shadow-sm" />
                     </div>
                 )}
+
                 {uploadStatus && (
                     <p className={`mb-4 text-center text-base font-medium ${uploadStatus.startsWith('Upload successful') ? 'text-green-600' : 'text-red-600'}`}>{uploadStatus}</p>
                 )}
-                <button
-                    onClick={handleUpload}
-                    disabled={!audioBlob || uploading}
-                    className="transition-all flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold shadow-md bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-green-400 disabled:opacity-50 mb-2"
-                >
-                    <span role="img" aria-label="upload">⬆️</span>
-                    {uploading ? 'Uploading...' : 'Upload to Walrus'}
-                </button>
+
+                {audioBlob && !isRecording && (
+                    <button
+                        onClick={handleUpload}
+                        disabled={!audioBlob || uploading}
+                        className="transition-all flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold shadow-md bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-green-400 disabled:opacity-50 mb-4"
+                    >
+                        {uploading ? 'Submitting...' : 'Submit'}
+                    </button>
+                )}
+
+                {/* Navigation buttons */}
+                {!isRecording && (
+                    <div className="flex gap-4 w-full">
+                        <button
+                            onClick={goToPreviousCard}
+                            disabled={currentCardIndex === 0}
+                            className="flex-[0.5] transition-all px-2 py-1 rounded-full font-semibold shadow-md bg-gradient-to-r from-gray-400 to-gray-500 text-white hover:from-gray-500 hover:to-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+                        <button
+                            onClick={() => setShowRecorder(false)}
+                            className="flex-[0.5] transition-all px-2 py-1 rounded-full font-semibold shadow-md bg-gradient-to-r from-purple-400 to-purple-500 text-white hover:from-purple-500 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                        >
+                            Back
+                        </button>
+                        <button
+                            onClick={goToNextCard}
+                            disabled={currentCardIndex === questions.length - 1}
+                            className="flex-[0.5] transition-all px-2 py-1 rounded-full font-semibold shadow-md bg-gradient-to-r from-blue-400 to-blue-500 text-white hover:from-blue-500 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
+
+                {/* Swipe instructions */}
+                {!isRecording && (
+                    <p className="text-xs text-gray-500 mt-4 text-center">
+                        Swipe left/right to navigate between questions
+                    </p>
+                )}
+
                 {/* Toast for upload result */}
                 {showToast && (
                     <div className={`fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 ${toastType === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'} animate-fade-in`}>
@@ -233,6 +488,138 @@ export default function AudioRecorder() {
                 }
                 .animate-pop {
                     animation: pop 0.5s cubic-bezier(0.4,0,0.2,1);
+                }
+                .start-recording-btn {
+                    width: 8rem;
+                    height: 8rem;
+                    border-radius: 9999px;
+                    background: linear-gradient(135deg, #ff0000 0%, #cc0000 50%, #990000 100%);
+                    box-shadow: 
+                        0 0 0 6px rgba(255, 255, 255, 0.15),
+                        0 0 0 12px rgba(255, 0, 0, 0.2),
+                        0 12px 48px 0 rgba(255, 0, 0, 0.4), 
+                        0 4px 16px 0 rgba(0,0,0,0.2),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.2),
+                        inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+                    border: 3px solid rgba(255, 255, 255, 0.3);
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: hidden;
+                }
+                .start-recording-btn::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(45deg, 
+                        rgba(255, 255, 255, 0.2) 0%, 
+                        rgba(255, 255, 255, 0.3) 25%, 
+                        rgba(0, 0, 0, 0.1) 50%, 
+                        rgba(255, 255, 255, 0.2) 75%, 
+                        rgba(0, 0, 0, 0.1) 100%);
+                    border-radius: 9999px;
+                    pointer-events: none;
+                }
+                .start-recording-btn::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 2rem;
+                    height: 2rem;
+                    background: white;
+                    border-radius: 50%;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                    pointer-events: none;
+                }
+                .start-recording-btn:active {
+                    transform: scale(0.95);
+                    box-shadow: 
+                        0 0 0 6px rgba(255, 255, 255, 0.1),
+                        0 0 0 12px rgba(255, 0, 0, 0.15),
+                        0 6px 24px 0 rgba(255, 0, 0, 0.3), 
+                        0 2px 8px 0 rgba(0,0,0,0.15),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.1),
+                        inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+                    filter: brightness(0.9);
+                }
+                .start-recording-btn:hover {
+                    box-shadow: 
+                        0 0 0 6px rgba(255, 255, 255, 0.2),
+                        0 0 0 12px rgba(255, 0, 0, 0.25),
+                        0 16px 64px 0 rgba(255, 0, 0, 0.5), 
+                        0 6px 24px 0 rgba(0,0,0,0.25),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.25),
+                        inset 0 -2px 0 rgba(0, 0, 0, 0.4);
+                }
+                .stop-recording-btn {
+                    width: 8rem;
+                    height: 8rem;
+                    border-radius: 9999px;
+                    background: linear-gradient(135deg, #ff0000 0%, #cc0000 50%, #990000 100%);
+                    box-shadow: 
+                        0 0 0 6px rgba(255, 255, 255, 0.15),
+                        0 0 0 12px rgba(255, 0, 0, 0.2),
+                        0 12px 48px 0 rgba(255, 0, 0, 0.4), 
+                        0 4px 16px 0 rgba(0,0,0,0.2),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.2),
+                        inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+                    border: 3px solid rgba(255, 255, 255, 0.3);
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: hidden;
+                }
+                .stop-recording-btn::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(45deg, 
+                        rgba(255, 255, 255, 0.2) 0%, 
+                        rgba(255, 255, 255, 0.3) 25%, 
+                        rgba(0, 0, 0, 0.1) 50%, 
+                        rgba(255, 255, 255, 0.2) 75%, 
+                        rgba(0, 0, 0, 0.1) 100%);
+                    border-radius: 9999px;
+                    pointer-events: none;
+                }
+                .stop-recording-btn::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 2rem;
+                    height: 2rem;
+                    background: black;
+                    border-radius: 0.25rem;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                    pointer-events: none;
+                }
+                .stop-recording-btn:active {
+                    transform: scale(0.95);
+                    box-shadow: 
+                        0 0 0 6px rgba(255, 255, 255, 0.1),
+                        0 0 0 12px rgba(255, 0, 0, 0.15),
+                        0 6px 24px 0 rgba(255, 0, 0, 0.3), 
+                        0 2px 8px 0 rgba(0,0,0,0.15),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.1),
+                        inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+                    filter: brightness(0.9);
+                }
+                .stop-recording-btn:hover {
+                    box-shadow: 
+                        0 0 0 6px rgba(255, 255, 255, 0.2),
+                        0 0 0 12px rgba(255, 0, 0, 0.25),
+                        0 16px 64px 0 rgba(255, 0, 0, 0.5), 
+                        0 6px 24px 0 rgba(0,0,0,0.25),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.25),
+                        inset 0 -2px 0 rgba(0, 0, 0, 0.4);
                 }
             `}</style>
         </div>
